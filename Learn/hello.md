@@ -289,7 +289,7 @@ $$
 
 12. 科学计算
     快捷键为 `Shift + Ctrl + Alt + E`
-   * $\frac{d}{dx}(x^3+x^2+1)$
+   * $\frac{d}{dx}(x^3+x^2+1)=x \left(3 x + 2\right)$
 
 
 
