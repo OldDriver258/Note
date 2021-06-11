@@ -5,3 +5,5 @@
 * 慕课网: http://www.feemic.cn/mooc/icourse163/1002692015#。
 * 百度云链接：https://pan.baidu.com/s/1h2aEk6A_DGpXkZvRtNmeUw 提取码：qoll
 * 配套实验课：https://www.shiyanlou.com/courses/115
+
+* 有大佬搭建好了环境: https://github.com/DeathKing/hit-oslab
