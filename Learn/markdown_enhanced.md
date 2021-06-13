@@ -4,7 +4,7 @@
 [TOC]
 ## 画图
 ### 流程图
-```mermaid
+``` mermaid
 graph LR
     A-->B;
     B-->C;
