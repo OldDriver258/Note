@@ -51,8 +51,8 @@ Yaffs Direct Interface(YDI)提供了整合的方法。需要为yaffs提供一些
 | yaffs_yaffs2.c                          | Yaffs2-mode specific code.                                |
 
 ## Yaffs direct interface
-| 源代码             | 说明                                                 |
-|-----------------|----------------------------------------------------|
+| 源代码          | 说明                                               |
+| --------------- | -------------------------------------------------- |
 | yaffs_attribs.c | Attribute handling.                                |
 | yaffs_error.c   | Error reporting code.                              |
 | yaffsfs.c       | Yaffs Direct Interface wrapper code.               |
@@ -60,8 +60,8 @@ Yaffs Direct Interface(YDI)提供了整合的方法。需要为yaffs提供一些
 | yaffs_qsort.c   | Qsort used during Yaffs2 scanning                  |
 
 ## flash器件、仿真和配置，在 direct/test-framework 目录下
-| 源代码                  | 说明                                                                                                                                                                 |
-|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 源代码               | 说明                                                                                                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | nanddrv.c            | A NAND driver layer that performs the commands to access NAND flash in a rudimentary manner. This code should work on many styles of CPU with little modification. |
 | yaffs_nanddrv.c      | A wrapper around the NAND driver which plugs it into Yaffs.                                                                                                        |
 | nandsim.c            | A NAND simulator layer that works with a nandstore_xxx backing store. This simulates a NAND chip.                                                                  |
@@ -74,8 +74,8 @@ Yaffs Direct Interface(YDI)提供了整合的方法。需要为yaffs提供一些
 
 ## 例子和测试构建文件
 
-| 源代码                             | 说明                                                                                                               |
-|---------------------------------|------------------------------------------------------------------------------------------------------------------|
+| 源代码                          | 说明                                                                                                             |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | dtest.c                         | A test harness. Also has sample code that can be used for better  understanding of how some function calls work. |
 | yaffscfg2k.c                    | A test configuration.                                                                                            |
 | yaffs_fileem.c yaffs_fileem2k.c | Nand flash simulation using a file as backing store.                                                             |
@@ -123,8 +123,8 @@ yaffs通过擦除块来格式化。yaffs_format()函数。
 * 没有典型的 spare area、ECC 布局。
 * 没有标准的坏块标记实现。
 
-| 函数接口                | 说明                                |
-|---------------------|-----------------------------------|
+| 函数接口            | 说明                              |
+| ------------------- | --------------------------------- |
 | drv_write_chunk_fn  | Write a data chunk                |
 | drv_read_chunk_fn   | Read a data chunk.                |
 | drv_erase_fn        | Erase a block                     |
@@ -140,17 +140,17 @@ yaffs通过擦除块来格式化。yaffs_format()函数。
 
 # POSIX文件系统接口
 ## 基本的概念
-|单词|概念|
-|---|---|
-File|文件是文件系统中的一个对象。yaffs支持文件类型：**常规文件**存储了一系列的字节；**目录**连接到其他的文件；其他文件的**符号链接**；**特殊文件**拥有设备id和其他信息。
-Directory|一个包含连接并且允许文件通过名字呗找到的结构。
-Link|一个可以找到对应文件的名字。分为硬链接和软链接两种。
-Handle|提供访问和操作一个文件的上下文。
-File mode|设置文件的种类和许可。
-Path|表示文件和目录的字符串。
-File metadata|除了文件内容的文件信息，包括名称，模式，大小和其他细节。
-Mount，partition，file system|把flash空间挂载到一个普通的目录结构下面。
-inode number|用来描述挂载的对象。
+| 单词                          | 概念                                                                                                                                                                |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| File                          | 文件是文件系统中的一个对象。yaffs支持文件类型：**常规文件**存储了一系列的字节；**目录**连接到其他的文件；其他文件的**符号链接**；**特殊文件**拥有设备id和其他信息。 |
+| Directory                     | 一个包含连接并且允许文件通过名字呗找到的结构。                                                                                                                      |
+| Link                          | 一个可以找到对应文件的名字。分为硬链接和软链接两种。                                                                                                                |
+| Handle                        | 提供访问和操作一个文件的上下文。                                                                                                                                    |
+| File mode                     | 设置文件的种类和许可。                                                                                                                                              |
+| Path                          | 表示文件和目录的字符串。                                                                                                                                            |
+| File metadata                 | 除了文件内容的文件信息，包括名称，模式，大小和其他细节。                                                                                                            |
+| Mount，partition，file system | 把flash空间挂载到一个普通的目录结构下面。                                                                                                                           |
+| inode number                  | 用来描述挂载的对象。                                                                                                                                                |
 
 ## 错误码
 错误码是从函数返回的一个整型，返回值小于0表示发生错误。
@@ -164,8 +164,138 @@ inode number|用来描述挂载的对象。
 
 ## 软链接
 链接的销毁：yaffs_unlink()
-以下情况只能使用软链接：
+软链接的特点：
+1. 不存在文件的别名
+2. 不在一个挂载点下面的文件的别名
+3. 对目录创建一个软链接
+4. 软链接不能保证一个文件存在。只有硬链接可以。
 
+## 基于Handle的文件处理
+一个文件的handle被定义为大于0的整型。
+一个handle是由yaffs_open()接口返回的。如果返回的是一个负值说明yaffs返回一个错误码。
+yaffs_open()可以带三个参数：
+1. 要打开文件的路径名称
+2. 访问的标志
+3. 创建模式
+
+访问标志包括：
+| 标志     | 备注                                            |
+| -------- | ----------------------------------------------- |
+| O_CREAT  | 如果没有就创建这个文件                          |
+| O_EXCL   | 和O_CREAT一起使用。如果已经存在文件则返回错误。 |
+| O_TRUNC  | 删减文件长度位0字节                             |
+| O_APPEND | 往文件的后面附加内容                            |
+| O_RDWR   | 读写权限打开文件                                |
+| O_WRONLY | 只写方式打开文件                                |
+| 0 (zero) | 只读方式打开                                    |
+
+创建的模式包括：
+| 模式     | 备注   |
+| -------- | ------ |
+| S_IREAD  | 只读   |
+| S_IWRITE | 只写   |
+| S_IEXEC  | 可执行 |
+
+通过Handle可以进行的操作：
+| 调用                                         | 描述                               |
+| -------------------------------------------- | ---------------------------------- |
+| yaffs_close(handle)                          | 关闭handle，不能再使用             |
+| yaffs_fsync(handle)                          | 数据落盘                           |
+| yaffs_datasync(handle)                       | 数据落盘，不包括 metadata元数据    |
+| yaffs_flush(handle)                          | 数据落盘同yaffs_fsync()            |
+| yaffs_dup(handle)                            | 复制handle                         |
+| yaffs_lseek(handle, offset,whence)           | 设置文件的读写位置                 |
+| yaffs_ftruncate(handle, size)                | 改变文件的大小                     |
+| yaffs_fstat(handle, buf)                     | 得到文件状态                       |
+| yaffs_fchmod(handle, mode)                   | 改变文件模式                       |
+| yaffs_read(handle, buffer,nbytes)            | 从文件指针读取数据，指针会自动增加 |
+| yaffs_pread(handle, buffer,nbytes, position) | 从指定为位置读取数据               |
+| yaffs_write(handle, buffer,nbytes)           | 从文件指针写入数据，指针会自动增加 |
+
+## 改变文件大小
+``` C
+    yaffs_truncate(path, newSize)
+    yaffs_ftruncate(handle, newSize)
+```
+
+## 读取、设置文件的信息
+``` C
+    yaffs_chmod(path, mode)
+    yaffs_fchmod(handle, mode)
+    yaffs_access(path,amode)
+    yaffs_stat(path, struct yaffs_stat *buf)
+    yaffs_fstat(handle, struct yaffs_stat *buf)
+    yaffs_lstat(path, struct yaffs_stat *buf)
+    yaffs_readlink(path, buf, bufsize)
+```
+
+## 改变目录结构和名称
+``` C
+    yaffs_open(path, flags, mode)
+    yaffs_mkdir(path, mode)
+    yaffs_symlink(targetPath, linkPath)
+    yaffs_mknod(pathname, mode, dev)
+    yaffs_link(existingPath, newath)
+    yaffs_unlink(path)
+    yaffs_rmdir(path)
+    yaffs_rename(oldPath, newPath)
+```
+
+## 搜索目录
+``` C
+    yaffs_DIR *yaffs_opendir(const YCHAR *dirname) ;
+    struct yaffs_dirent *yaffs_readdir(yaffs_DIR *dirp) ;直接目录
+    void yaffs_rewinddir(yaffs_DIR *dirp) ;复位目录
+    int yaffs_closedir(yaffs_DIR *dirp) ;
+```
+
+## 搜索目录（文件接口）
+``` C
+    int yaffs_open(const YCHAR *dirname, O_RDONLY, 0) ;
+    struct yaffs_dirent *yaffs_readdir_fd(int fd) ;
+    void yaffs_rewinddir_fd(int fd) ;
+    int yaffs_close(int fd) ;
+```
+
+## 挂载控制
+``` C
+    yaffs_mount(path) ;
+    yaffs_mount2(path, readOnly);
+    yaffs_unmount(path); //如果有文件打开会失败
+    yaffs_unmount2(path, int force);  //如果有文件打开也会强制取消挂载
+    yaffs_remount(path, force, readOnly);
+    yaffs_sync(path) ;
+    yaffs_format(const YCHAR *path, //格式化
+                    int unmount_flag,
+                    int force_unmount_flag,
+                    int remount_flag)
+```
+
+## 扩展属性（xattrt）
+``` C
+    /*
+     * 设置、获得、删除、列出 xattr
+     * flag:
+     * XATTR_CREATE:创建，如果已经存在，返回报错
+     * XATTR_REPLACE：替换已有的
+     * 0：仅仅创建，如果存在就替换，如果空间不足报错
+     */
+    int yaffs_setxattr(const char *path, const char *name, const void *data, int size, int flags);
+    int yaffs_lsetxattr(const char *path, const char *name, const void *data, int size, int flags);
+    int yaffs_fsetxattr(int fd, const char *name, const void *data, int size, int flags);
+    
+    int yaffs_getxattr(const char *path, const char *name, void *data, int size);
+    int yaffs_lgetxattr(const char *path, const char *name, void *data, int size);
+    int yaffs_fgetxattr(int fd, const char *name, void *data, int size);
+
+    int yaffs_removexattr(const char *path, const char *name);
+    int yaffs_lremovexattr(const char *path, const char *name);
+    int yaffs_fremovexattr(int fd, const char *name);
+
+    int yaffs_listxattr(const char *path, char *list, int size);
+    int yaffs_llistxattr(const char *path, char *list, int size);
+    int yaffs_flistxattr(int fd, char *list, int size);
+```
 
 # 参考文献
 >YaffsDirect.pdf官方说明文档
