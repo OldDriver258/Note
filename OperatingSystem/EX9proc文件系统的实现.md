@@ -311,7 +311,7 @@ int proc_read(int dev, unsigned long * pos, char * buf, int count)
 
 ### 实验结果
 
-![image-20210822221444166](images\image-20210822221444166.png)
+![image-20210822221444166](images/image-20210822221444166.png)
 
 ### 问题
 
